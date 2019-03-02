@@ -48,8 +48,8 @@ module.exports = class Arduino {
     parseResponse(data) {
         let decodedData = StringDecoder.write(data)
         let responseType = decodedData.split(': ')[0]
-        let payload = decodedData.split(': ')[1].replace('\r\n', '')
         // console.log(decodedData)
+        let payload = decodedData.split(': ')[1].replace('\r\n', '')
         return {
             responseType,
             payload
@@ -59,14 +59,14 @@ module.exports = class Arduino {
     sendCommand(name, params = [], expectResponse = false) {
         return new Promise((resolve, reject) => {
             let toSend = name.toUpperCase()
-            if (params.length <= 3) {
+            if (params.length <= 4) {
                 params.forEach(p => {
                     toSend += '#' + p
                 })
             }
             toSend += '\n'
             if (expectResponse) {
-                this.device.removeAllListeners()
+                this.device.removeAllListeners('data')
                 this.device.on('data', data => {
                     return resolve(this.parseResponse(data))
                 })

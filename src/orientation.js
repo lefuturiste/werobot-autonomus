@@ -1,19 +1,19 @@
 module.exports = class Orientation {
-    constructor(arduino, gyro) {
-        this.arduino = arduino
-        this.gyro = gyro
+    constructor(robot) {
+        this.robot = robot
     }
 
-    goToOrientation(targetOrientation) {
+    goToOrientation(targetOrientation, precision = 3, speed = 50) {
         return new Promise((resolve, reject) => {
+            this.precision = precision
             let sense = this.senseForOrientation(targetOrientation)
             if (sense == 'right') {
-                this.arduino.sendCommand('TWICE', [0, 50])
+                this.robot.arduino.sendCommand('TWICE', [0, speed])
             } else {
-                this.arduino.sendCommand('TWICE', [-50, 0])
+                this.robot.arduino.sendCommand('TWICE', [-speed, 0])
             }
             this.untilRightOrientation(targetOrientation).then(() => {
-                this.arduino.sendCommand('STOPALL')
+                this.robot.arduino.sendCommand('STOPALL')
                 resolve()
             })
         })
@@ -21,14 +21,14 @@ module.exports = class Orientation {
 
     untilRightOrientation(targetOrientation) {
         return new Promise((resolve) => {
-            this.gyro.getAngleZ().then(angle => {
+            this.robot.gyro.getAngleZ().then(angle => {
                 console.log('----')
                 console.log(targetOrientation)
                 console.log(angle)
-                var deltaZ = Math.abs(targetOrientation) - Math.abs(angle)
+                var deltaZ = Math.abs(targetOrientation - angle)            
                 console.log(deltaZ)
                 console.log('----')
-                if (deltaZ < 3) {
+                if (deltaZ < this.precision) {
                     resolve()
                 } else {
                     setTimeout(() => {

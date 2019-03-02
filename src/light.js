@@ -1,16 +1,32 @@
 module.exports = class Light {
-    constructor(arduino) {
-        this.arduino = arduino
+    constructor(robot) {
+        this.robot = robot
         this.discoveredValue = 90
         this.isDiscovered = false
     }
 
+    getLightValue() {
+        return new Promise(resolve => {
+            this.robot.arduino.sendCommand('LIGHT', [], true).then(response => {
+                return resolve(parseInt(response.payload))
+            })
+        })
+    }
+
+    setAsCoverValue() {
+        return new Promise((resolve) => {
+            this.getLightValue().then(value => {
+                this.discoveredValue = value + 20
+                return resolve()
+            })
+        })        
+    }
+
     checkLightValue() {
         return new Promise((resolve) => {
-            this.arduino.sendCommand('LIGHT', [], true).then(response => {
-                let lightValue = parseInt(response.payload)
-                // console.log(lightValue)
-                if (lightValue >= this.discoveredValue) {
+            this.getLightValue().then(value => {
+                // console.log(value)
+                if (value >= this.discoveredValue) {
                     this.isDiscovered = true
                     resolve()
                 } else {

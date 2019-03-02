@@ -1,17 +1,45 @@
 module.exports = class Color {
-    constructor(arduino = null) {
-        this.arduino = arduino
+    constructor(robot) {
+        this.robot = robot
+        this.mustStopBlink = false
     }
 
-    setRgbColor(r, g, b) {
+    setRgbColor(r, g, b, leds = 0) {
         // console.log(r)
         // console.log(g)
         // console.log(b)
-        this.arduino.sendCommand('COLOR', [r, g, b])
+        return this.robot.arduino.sendCommand('COLOR', [r, g, b, leds])
     }
 
     clear() {
         this.setRgbColor(0, 0, 0)
+    }
+
+    stopBlink() {
+        this.mustStopBlink = true
+    }
+
+    blinkLed(r, g, b, leds = 0, timeout = 500, totalTicks = -1, mode = true, currentTick = 0) {        
+        return new Promise((resolve) => {
+            if (this.mustStopBlink) {
+                return resolve()
+            }
+            if (mode) {
+                this.setRgbColor(r, g, b, leds)
+            } else {
+                this.setRgbColor(0, 0, 0, leds)
+            }
+            setTimeout(() => {
+                if (totalTicks != -1) {
+                    currentTick++
+                    if (currentTick >= totalTicks) {
+                        this.mustStopBlink = false
+                        return resolve()
+                    }
+                }
+                return this.blinkLed(r, g, b, leds, timeout, totalTicks, !mode, currentTick)
+            }, timeout)
+        })
     }
 
     // hexToRGB(hex, alpha) {
@@ -36,18 +64,19 @@ module.exports = class Color {
         ];
     }
 
-    setRgbaColor(r, g, b, a) {
+    setRgbaColor(r, g, b, a, leds = 0) {
         let result = this.rgbaToRgb(r, g, b, a)
-        this.setRgbColor(result[0], result[1], result[2])
+        return this.setRgbColor(result[0], result[1], result[2], leds)
     }
 
-    setHexColor(hexCode, alpha) {
+    setHexColor(hexCode, alpha, leds = 0) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexCode);
-        this.setRgbaColor(
+        return this.setRgbaColor(
             parseInt(result[1], 16),
             parseInt(result[2], 16),
             parseInt(result[3], 16),
-            alpha
+            alpha,
+            leds
         )
     }
 }

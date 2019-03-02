@@ -1,0 +1,29 @@
+{
+  "name": "werobot-autonomus",
+  "version": "0.0.1",
+  "description": "## install",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lefuturiste/werobot-autonomus.git"
+  },
+  "keywords": [
+    "werobot",
+    "robot",
+    "tdr2019"
+  ],
+  "author": "lefuturiste",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lefuturiste/werobot-autonomus/issues"
+  },
+  "homepage": "https://github.com/lefuturiste/werobot-autonomus#readme",
+  "dependencies": {
+    "node-mouse": "0.0.2",
+    "serialport": "^7.1.4",
+    "string_decoder": "^1.2.0"
+  }
+}

@@ -1,14 +1,20 @@
 module.exports = class Gyro {
-    constructor(arduino) {
-        this.arduino = arduino
+    constructor(robot) {
+        this.robot = robot
+    }
+
+    reset() {
+        return new Promise((resolve) => {
+            this.robot.arduino.sendCommand('RGYRO').then(() => {
+                resolve()
+            })
+        })
     }
 
     getAngleZ() {
         return new Promise((resolve) => {
-            // resolved = false
-            // arduino.sendCommand('RGYRO')
-            this.arduino.sendCommand('ANGLEZ', [], true).then(response => {
-                resolve(response.payload)
+            this.robot.arduino.sendCommand('ANGLEZ', [], true).then(response => {
+                resolve(parseFloat(response.payload))
             })
         })
     }
