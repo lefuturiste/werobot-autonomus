@@ -4,6 +4,9 @@ let LightHelper = require('./light.js')
 let ColorHelper = require('./color.js')
 let OrientationHelper = require('./orientation.js')
 let MoveYHelper = require('./moveY.js')
+let ArmHelper = require('./arm.js')
+let BeaconHelper = require('./beacon.js')
+let ElectronHelper = require('./electron.js')
 let Arduino = require('./arduino.js')
 let process = require('process')
 
@@ -14,9 +17,12 @@ module.exports = class Robot {
         this.gyro = new GyroHelper(this)
         this.light = new LightHelper(this)
         this.color = new ColorHelper(this)
+        this.arm = new ArmHelper(this)
+        this.beacon = new BeaconHelper(this)
+        this.electron = new ElectronHelper(this)
         this.orientation = new OrientationHelper(this)
         this.moveY = new MoveYHelper(this)
-        this.gameDurationInSeconds = 20
+        this.gameDurationInSeconds = 100
     }
 
     init() {
@@ -39,6 +45,9 @@ module.exports = class Robot {
     }
 
     onGameStart() {
+        this.color.clear()
+        this.beacon.disable()
+        this.arm.close()
         console.log('GENERAL: game started!')
         setTimeout(() => {
             this.onGameFinished()
@@ -46,18 +55,46 @@ module.exports = class Robot {
     }   
 
     onRobotReady() {
-        this.light.setAsCoverValue().then(() => {
-            this.light.untilDiscover().then(() => {
-                console.log('GENERAL: discovered!')
-                this.onGameStart()
-                this.gyro.loopAngleZ()
-                this.color.blinkLed(10, 0, 0, 0)
+        //this.color.setPurpleTeamColor(0.10)
+        //this.electron.loopTrigger(500)
+        //this.beacon.disable()
+        // this.light.setAsCoverValue().then(() => {
+        //     this.light.untilDiscover().then(() => {
+        //         console.log('GENERAL: discovered!')
+        //         this.onGameStart()
+        //         // this.arm.open()
+        //         // this.gyro.loopAngleZ()
+        //         // this.color.blinkLed(10, 0, 0, 0)
+        //         // this.beacon.enable()          
 
-                this.moveY.goForwardY(40, 55, true).then(() => {
-                    console.log('good position')
-                })
-            })
-        })       
+        //     //    this.orientation.goToOrientation(15, 0.5, 10).then(() => {
+        //     //        console.log('orientation success')
+        //     //    })
+        //         // this.orientation.goToOrientation(90, 3, 75).then(() => {
+
+        //         // })
+
+                
+        //         // GOOD CALIBRATED JOURNEY
+        //         // this.moveY.goForwardY(60, 75, true).then(() => {
+        //         //     console.log('good position')
+        //         //     this.orientation.goToOrientation(90).then(() => {
+        //         //         console.log('good orientation')
+        //         //         this.moveY.goForwardY(40, 75, true).then(() => {
+        //         //             console.log('good position')
+        //         //             this.orientation.goToOrientation(-80).then(() => {
+        //         //                 this.moveY.goForwardY(60, 75, true).then(() => {
+        //         //                     console.log('good position')
+        //         //                     this.orientation.goToOrientation(-20).then(() => {
+        //         //                         console.log('good orientation')
+        //         //                     })
+        //         //                 })
+        //         //             })
+        //         //         })
+        //         //     })
+        //         // })
+        //     })
+        // })       
 
         // setTimeout(() => {
         //     // stop all in 100 seconds
@@ -89,11 +126,15 @@ module.exports = class Robot {
 
     onGameFinished() {
         console.log('GENERAL: end of the game')
+        this.color.setRgbColor(0, 0, 10)
         this.arduino.sendCommand('STOPALL').then(() => {
             console.log('GENERAL: all engines stopped')
-            console.log('GENERAL: autokill')
-            // exit the process (autokill)
-            process.exit(1)
+            this.arm.close().then(() => {
+                console.log('GENERAL: arm closed')
+                console.log('GENERAL: autokill')
+                // exit the process (autokill)
+                process.exit(1)
+            })
         })
     }
 }

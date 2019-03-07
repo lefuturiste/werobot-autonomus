@@ -1,6 +1,7 @@
 module.exports = class Orientation {
     constructor(robot) {
         this.robot = robot
+        this.lastOrientation = 0
     }
 
     goToOrientation(targetOrientation, precision = 3, speed = 50) {
@@ -12,14 +13,14 @@ module.exports = class Orientation {
             } else {
                 this.robot.arduino.sendCommand('TWICE', [-speed, 0])
             }
-            this.untilRightOrientation(targetOrientation).then(() => {
+            this.untilRightOrientation(targetOrientation, speed, sense).then(() => {
                 this.robot.arduino.sendCommand('STOPALL')
                 resolve()
             })
         })
     }
 
-    untilRightOrientation(targetOrientation) {
+    untilRightOrientation(targetOrientation, speed, sense) {
         return new Promise((resolve) => {
             this.robot.gyro.getAngleZ().then(angle => {
                 console.log('----')
@@ -28,11 +29,21 @@ module.exports = class Orientation {
                 var deltaZ = Math.abs(targetOrientation - angle)            
                 console.log(deltaZ)
                 console.log('----')
-                if (deltaZ < this.precision) {
+                if (Math.abs(angle - this.lastOrientation) < 0.5) {
+                    console.log('add more speed')
+                    speed = speed + 50
+                    if (sense == 'right') {
+                        this.robot.arduino.sendCommand('TWICE', [0, speed])
+                    } else {
+                        this.robot.arduino.sendCommand('TWICE', [-speed, 0])
+                    }
+                }
+                this.lastOrientation = angle
+                if (deltaZ < this.precision || Math.abs(targetOrientation) < Math.abs(angle)) {
                     resolve()
                 } else {
                     setTimeout(() => {
-                        return this.untilRightOrientation(targetOrientation).then(resolve)
+                        return this.untilRightOrientation(targetOrientation, speed, sense).then(resolve)
                     }, 50)
                 }
             })

@@ -48,7 +48,7 @@ module.exports = class Arduino {
     parseResponse(data) {
         let decodedData = StringDecoder.write(data)
         let responseType = decodedData.split(': ')[0]
-        // console.log(decodedData)
+        console.log(decodedData)
         let payload = decodedData.split(': ')[1].replace('\r\n', '')
         return {
             responseType,
@@ -57,6 +57,7 @@ module.exports = class Arduino {
     }
 
     sendCommand(name, params = [], expectResponse = false) {
+        console.log(name)
         return new Promise((resolve, reject) => {
             let toSend = name.toUpperCase()
             if (params.length <= 4) {

@@ -2,6 +2,8 @@ module.exports = class Color {
     constructor(robot) {
         this.robot = robot
         this.mustStopBlink = false
+        this.yellowColor = [142, 68, 173]
+        this.purpleColor = [241, 196, 15]
     }
 
     setRgbColor(r, g, b, leds = 0) {
@@ -58,9 +60,9 @@ module.exports = class Color {
         let back = [255, 255, 255]
 
         return [
-            (1 - a) * 255 + a * r,
-            (1 - a) * 255 + a * g,
-            (1 - a) * 255 + a * b
+            r * a,
+            b * a,
+            g * a
         ];
     }
 
@@ -78,5 +80,13 @@ module.exports = class Color {
             alpha,
             leds
         )
+    }
+
+    setYellowTeamColor(alpha = 0.25) {
+        return this.setRgbaColor(this.yellowColor[0], this.yellowColor[1], this.yellowColor[2], alpha)
+    }
+    
+    setPurpleTeamColor(alpha = 0.25) {
+        return this.setRgbaColor(this.purpleColor[0], this.purpleColor[1], this.purpleColor[2], alpha)
     }
 }

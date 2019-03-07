@@ -38,8 +38,11 @@ module.exports = class Light {
         })
     }
 
-    untilDiscover() {
+    untilDiscover(debug = false) {
         return new Promise((resolve) => {
+            if (debug) {
+                return resolve()
+            }
             this.checkLightValue().then(() => {
                 resolve()
             })

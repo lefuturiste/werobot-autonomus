@@ -4,6 +4,7 @@ module.exports = class MoveY {
     }
 
     goForwardY(targetDistanceY, speed = 50, enableAngleRecovery = true) {
+        //TODO: correct overflow y!!
         return new Promise((resolve, reject) => {
             this.robot.mouse.reset()
             this.robot.gyro.reset().then(() => {
@@ -38,7 +39,7 @@ module.exports = class MoveY {
                     this.robot.arduino.sendCommand('STOPALL').then(() => {
                         this.robot.gyro.reset().then(() => {
                             console.log('to correct: ' + (-angle))
-                            this.robot.orientation.goToOrientation(-angle, 0.5, 35).then(() => {
+                            this.robot.orientation.goToOrientation(-angle, 1, 50).then(() => {
                                 console.log('angle corrected')
                                 this.robot.gyro.reset().then(() => {
                                     return this.untilRightPosition(targetDistanceY, speed, enableAngleRecovery).then(resolve)
