@@ -5,13 +5,13 @@ module.exports = class Beacon {
     }
 
     enable() {
-        console.log('BEACON: enabled')
+        console.log('BEACON: Enabled')
         this.enabled = true
         return this.robot.arduino.sendCommand('ALARM#1')
     }
 
     disable() {
-        console.log('BEACON: disabled')
+        console.log('BEACON: Disabled')
         this.enabled = false
         return this.robot.arduino.sendCommand('ALARM#0')
     }

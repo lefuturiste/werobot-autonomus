@@ -48,7 +48,7 @@ module.exports = class Arduino {
     parseResponse(data) {
         let decodedData = StringDecoder.write(data)
         let responseType = decodedData.split(': ')[0]
-        console.log(decodedData)
+        //console.log(decodedData)
         let payload = decodedData.split(': ')[1].replace('\r\n', '')
         return {
             responseType,
@@ -57,7 +57,7 @@ module.exports = class Arduino {
     }
 
     sendCommand(name, params = [], expectResponse = false) {
-        console.log(name)
+        // console.log(name)
         return new Promise((resolve, reject) => {
             let toSend = name.toUpperCase()
             if (params.length <= 4) {
@@ -81,6 +81,22 @@ module.exports = class Arduino {
                     if (!expectResponse) {
                         resolve()
                     }
+                }
+            })
+        })
+    }
+
+
+    /**
+     * Send a ping to known if we can communicate correctly with the arduino
+     */
+    isAlive() {
+        return new Promise((resolve, reject) => {
+            this.sendCommand('PING', [], true).then(response => {
+                if (response.payload !== 'pong!' || response.responseType !== 'L') {
+                    return reject()
+                } else {
+                    return resolve()
                 }
             })
         })

@@ -2,8 +2,8 @@ module.exports = class Color {
     constructor(robot) {
         this.robot = robot
         this.mustStopBlink = false
-        this.yellowColor = [142, 68, 173]
-        this.purpleColor = [241, 196, 15]
+        this.yellowColor = [241, 196, 15]
+        this.purpleColor = [142, 68, 173]
     }
 
     setRgbColor(r, g, b, leds = 0) {
@@ -14,20 +14,20 @@ module.exports = class Color {
     }
 
     clear() {
-        this.setRgbColor(0, 0, 0)
+        return this.setRgbColor(0, 0, 0)
     }
 
     stopBlink() {
         this.mustStopBlink = true
     }
 
-    blinkLed(r, g, b, leds = 0, timeout = 500, totalTicks = -1, mode = true, currentTick = 0) {        
+    blinkLed(r, g, b, alpha = 1, leds = 0, timeout = 500, totalTicks = -1, mode = true, currentTick = 0) {        
         return new Promise((resolve) => {
             if (this.mustStopBlink) {
                 return resolve()
             }
             if (mode) {
-                this.setRgbColor(r, g, b, leds)
+                this.setRgbaColor(r, g, b, alpha, leds)
             } else {
                 this.setRgbColor(0, 0, 0, leds)
             }
@@ -39,7 +39,7 @@ module.exports = class Color {
                         return resolve()
                     }
                 }
-                return this.blinkLed(r, g, b, leds, timeout, totalTicks, !mode, currentTick)
+                return this.blinkLed(r, g, b, alpha, leds, timeout, totalTicks, !mode, currentTick)
             }, timeout)
         })
     }
@@ -56,22 +56,22 @@ module.exports = class Color {
     //     }
     // }
 
-    rgbaToRgb(r, g, b, a) {
+    rgbaToRgb(r, g, b, a = 1) {
         let back = [255, 255, 255]
 
         return [
             r * a,
-            b * a,
-            g * a
+            g * a,
+            b * a
         ];
     }
 
-    setRgbaColor(r, g, b, a, leds = 0) {
+    setRgbaColor(r, g, b, a = 1, leds = 0) {
         let result = this.rgbaToRgb(r, g, b, a)
         return this.setRgbColor(result[0], result[1], result[2], leds)
     }
 
-    setHexColor(hexCode, alpha, leds = 0) {
+    setHexColor(hexCode, alpha = 1, leds = 0) {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexCode);
         return this.setRgbaColor(
             parseInt(result[1], 16),

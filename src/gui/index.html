@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Werobot Autonomus robot control panel</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <v-content>
+                <v-toolbar dark color="primary">
+                    <v-toolbar-side-icon></v-toolbar-side-icon>
+
+                    <v-toolbar-title class="white--text">Autonomus robot control panel</v-toolbar-title>
+
+                    <v-spacer></v-spacer>
+
+                    <!-- <v-btn icon>
+                        <v-icon>search</v-icon>
+                    </v-btn>
+
+                    <v-btn icon>
+                        <v-icon>apps</v-icon>
+                    </v-btn>
+
+                    <v-btn icon>
+                        <v-icon>refresh</v-icon>
+                    </v-btn>
+
+                    <v-btn icon>
+                        <v-icon>more_vert</v-icon>
+                    </v-btn> -->
+                </v-toolbar>
+                <v-container>
+                    <v-radio-group v-model="team">
+                        <v-radio label="Team 1 - Purple" value="purple" color="purple"></v-radio>
+                        <v-radio label="Team 2 - Yellow" value="yellow" color="yellow"></v-radio>
+                    </v-radio-group>
+                    <v-layout justify-center wrap :column="$vuetify.breakpoint.smAndDown">
+                        <v-btn color="success" @click="setAsCoverValue">As cover value</v-btn>
+                        <v-btn color="error" @click="stop">Stop</v-btn>
+                        <v-btn color="warning" @click="reset">Reset</v-btn>
+                    </v-layout>
+                    <v-list subheader class="mt-4">
+                        <v-divider></v-divider>
+                        <v-list-tile>
+                            <v-list-tile-action>
+                                <v-switch v-model="arm" color="primary"></v-switch>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title>
+                                    Arm
+                                </v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>
+                        <v-divider></v-divider>
+                        <v-list-tile>
+                            <v-list-tile-action>
+                                <v-switch v-model="beacon" color="primary"></v-switch>
+                            </v-list-tile-action>
+                            <v-list-tile-content>
+                                <v-list-tile-title>
+                                    Beacon
+                                </v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>                        
+                        <v-divider></v-divider>
+                    </v-list>
+                </v-container>
+            </v-content>
+        </v-app>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: () => ({
+                status: 'not-started',
+                arm: false,
+                beacon: false,
+                team: ''
+            }),
+            methods: {
+                setAsCoverValue: () => {
+                    axios.get('/as-cover-value')
+                },
+                reset: () => {
+                    axios.get('/reset')
+                }
+            },
+            watch: {
+                team: (value) => {
+                    switch (value) {
+                        case 'yellow':
+                            axios.get('/team/yellow')
+                            break;
+                        case 'purple':
+                            axios.get('/team/purple')
+                            break;
+                    }
+                },
+                arm: (value) => {
+                    if (value) {
+                        axios.get('/arm/open')
+                    } else {
+                        axios.get('/arm/close')
+                    }
+                },
+                beacon: (value) => {
+                    if (value) {
+                        axios.get('/beacon/on')
+                    } else {
+                        axios.get('/beacon/off')
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

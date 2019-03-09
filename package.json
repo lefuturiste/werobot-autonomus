@@ -4,7 +4,9 @@
   "description": "## install",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./app.js",
+    "dev": "./node_modules/.bin/nodemon app.js",
+    "deamon": "pm2 start app.js --name autonomus --log-date-format=\"YYYY - MM - DD HH: mm Z \" -l ./log.txt"
   },
   "repository": {
     "type": "git",
@@ -22,7 +24,10 @@
   },
   "homepage": "https://github.com/lefuturiste/werobot-autonomus#readme",
   "dependencies": {
+    "express": "^4.16.4",
+    "node-bluetooth": "^1.2.5",
     "node-mouse": "0.0.2",
+    "nodemon": "^1.18.10",
     "serialport": "^7.1.4",
     "string_decoder": "^1.2.0"
   }

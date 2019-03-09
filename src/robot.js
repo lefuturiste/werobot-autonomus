@@ -7,6 +7,8 @@ let MoveYHelper = require('./moveY.js')
 let ArmHelper = require('./arm.js')
 let BeaconHelper = require('./beacon.js')
 let ElectronHelper = require('./electron.js')
+// let BluetoothHelper = require('./bluetooth.js')
+let Web = require('./web.js')
 let Arduino = require('./arduino.js')
 let process = require('process')
 
@@ -22,41 +24,50 @@ module.exports = class Robot {
         this.electron = new ElectronHelper(this)
         this.orientation = new OrientationHelper(this)
         this.moveY = new MoveYHelper(this)
+        //this.bluetooth = new BluetoothHelper(this)
+        this.web = new Web(this)
         this.gameDurationInSeconds = 100
+        this.team = 'purple'
     }
 
     init() {
+        console.log('GENERAL: Initialization started...')
         this.mouse.init(false)
         this.arduino.init().then(() => {
             // stop all engines
-            this.arduino.sendCommand('STOPALL').then(() => {
-                // then ping
-                this.arduino.sendCommand('PING', [], true).then(response => {
-                    if (response.payload !== 'pong!' || response.responseType !== 'L') {
-                        console.log('GENERAL: error on ping check')
-                        process.exit()
-                    }                    
-                    console.log('GENERAL: ROBOT READY')
-
-                    this.onRobotReady()                    
+            // then ping
+            this.arduino.isAlive().then(() => {
+                console.log('GENERAL: ROBOT READY')
+                this.color.setRgbaColor(0, 255, 0, 0.25, 1)
+                this.reset().then(() => {
+                    this.web.init().then(() => {
+                        this.color.setRgbaColor(0, 255, 0, 0.25, 7)
+                    })
                 })
+            }).catch(() => {
+                console.log('GENERAL: Error on ping check')
+                process.exit()
             })
         })
     }
 
     onGameStart() {
-        this.color.clear()
-        this.beacon.disable()
-        this.arm.close()
         console.log('GENERAL: game started!')
         setTimeout(() => {
             this.onGameFinished()
         }, this.gameDurationInSeconds * 1000)
-    }   
+    }
+
+    onRobotDiscovered () {
+        console.log('GENERAL: Discovered!')
+        this.showTeamColor()
+    }
 
     onRobotReady() {
         //this.color.setPurpleTeamColor(0.10)
-        //this.electron.loopTrigger(500)
+        // this.electron.loopTrigger(500).then(() => {
+        //     console.log('electron finished')
+        // })
         //this.beacon.disable()
         // this.light.setAsCoverValue().then(() => {
         //     this.light.untilDiscover().then(() => {
@@ -74,7 +85,7 @@ module.exports = class Robot {
 
         //         // })
 
-                
+
         //         // GOOD CALIBRATED JOURNEY
         //         // this.moveY.goForwardY(60, 75, true).then(() => {
         //         //     console.log('good position')
@@ -102,7 +113,7 @@ module.exports = class Robot {
         //     Arduino.sendCommand('STOPALL')
         // }, 1000 * 5)
         // ColorHelper.clear();
-        
+
         // })  
         // console.log('GENERAL: ROBOT DISCOVERED')
         // game started
@@ -136,5 +147,36 @@ module.exports = class Robot {
                 process.exit(1)
             })
         })
+    }
+
+    reset() {
+        return new Promise((resolve) => {
+            this.arduino.sendCommand('STOPALL').then(() => {
+                this.color.clear().then(() => {
+                    this.beacon.disable().then(() => {
+                        this.arm.close().then(() => {
+                            console.log('GENERAL: Robot reseted')
+                            return resolve()
+                        })
+                    })
+                })
+            })
+        })
+    }
+
+    setYellowTeam() {
+        this.team = "yellow"
+        console.log('GENERAL: Team is now yellow')
+        return this.color.setYellowTeamColor()
+    }
+
+    setPurpleTeam() {
+        this.team = "purple"
+        console.log('GENERAL: Team is now purple')
+        return this.color.setPurpleTeamColor()
+    }
+
+    showTeamColor() {
+        return this.team === 'yellow' ? this.color.setYellowTeamColor() : this.color.setPurpleTeamColor()
     }
 }

@@ -10,14 +10,17 @@ module.exports = class Arm {
     }
 
     reset() {
+        console.log('ARM: Reseted')
         return this.setAngle(0)
     }
 
     open() {
+        console.log('ARM: Opened')
         return this.setAngle(this.openAngle)
     }
 
     close() {
+        console.log('ARM: Closed')
         return this.setAngle(this.closeAngle)
     }
 }
