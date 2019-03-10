@@ -5,6 +5,7 @@ module.exports = class Gyro {
 
     reset() {
         return new Promise((resolve) => {
+            console.log('Gyro: reseted')
             this.robot.arduino.sendCommand('RGYRO').then(() => {
                 resolve()
             })
@@ -14,7 +15,8 @@ module.exports = class Gyro {
     getAngleZ() {
         return new Promise((resolve) => {
             this.robot.arduino.sendCommand('ANGLEZ', [], true).then(response => {
-                resolve(parseFloat(response.payload))
+                let result = parseFloat(response.payload)
+                resolve(result == NaN ? 0.00 : result)
             })
         })
     }

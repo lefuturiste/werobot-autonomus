@@ -1,4 +1,5 @@
 let GyroHelper = require('./gyro.js')
+let EngineHelper = require('./engine.js')
 let MouseHelper = require('./mouse.js')
 let LightHelper = require('./light.js')
 let ColorHelper = require('./color.js')
@@ -16,6 +17,7 @@ module.exports = class Robot {
     constructor() {
         this.arduino = new Arduino()
         this.mouse = new MouseHelper()
+        this.engine = new EngineHelper(this)
         this.gyro = new GyroHelper(this)
         this.light = new LightHelper(this)
         this.color = new ColorHelper(this)
@@ -34,15 +36,45 @@ module.exports = class Robot {
         console.log('GENERAL: Initialization started...')
         this.mouse.init(false)
         this.arduino.init().then(() => {
-            // stop all engines
             // then ping
             this.arduino.isAlive().then(() => {
                 console.log('GENERAL: ROBOT READY')
                 this.color.setRgbaColor(0, 255, 0, 0.25, 1)
                 this.reset().then(() => {
-                    this.web.init().then(() => {
-                        this.color.setRgbaColor(0, 255, 0, 0.25, 7)
-                    })
+                    this.color.setRgbaColor(0, 0, 255, 0.25, 1)
+                    setTimeout(() => {
+                        this.moveY.goForwardY(30, 75, true).then(() => {
+                            console.log('good position')
+                            // this.moveY.goForwardY(-60, 75, true).then(() => {
+                            //     console.log('good position')
+                            // })
+                        })
+                        // // this.engine.setSpeed(100, -100)
+                    //    this.moveY.goForwardY(60, 75, true).then(() => {
+                    //        console.log('good position')
+                    //        this.orientation.goToOrientation(90).then(() => {
+                    //            console.log('good orientation')
+                    //            this.moveY.goForwardY(40, 75, true).then(() => {
+                    //                console.log('good position')
+                    //                this.orientation.goToOrientation(-80).then(() => {
+                    //                    this.moveY.goForwardY(60, 75, true).then(() => {
+                    //                        console.log('good position')
+                    //                        this.orientation.goToOrientation(-20).then(() => {
+                    //                            console.log('good orientation')
+                    //                        })
+                    //                    })
+                    //                })
+                    //            })
+                    //        })
+                    //    })
+                    }, 500)
+                    // GOOD CALIBRATED JOURNEY
+                    
+                    
+                    
+                    // this.web.init().then(() => {
+                    //     this.color.setRgbaColor(0, 255, 0, 0.25, 7)
+                    // })
                 })
             }).catch(() => {
                 console.log('GENERAL: Error on ping check')
@@ -50,6 +82,14 @@ module.exports = class Robot {
             })
         })
     }
+
+    // orientationLoop(bool = false) {
+    //     this.orientation.goToOrientation(bool ? 20 : -20, 3, 50, false, false, false).then(() => {
+    //         setTimeout(() => {
+    //             this.orientationLoop(!bool)
+    //         }, 500)
+    //     })
+    // }
 
     onGameStart() {
         console.log('GENERAL: game started!')
@@ -60,7 +100,7 @@ module.exports = class Robot {
 
     onRobotDiscovered () {
         console.log('GENERAL: Discovered!')
-        this.showTeamColor()
+        this.showTeamColor()        
     }
 
     onRobotReady() {
@@ -138,20 +178,16 @@ module.exports = class Robot {
     onGameFinished() {
         console.log('GENERAL: end of the game')
         this.color.setRgbColor(0, 0, 10)
-        this.arduino.sendCommand('STOPALL').then(() => {
-            console.log('GENERAL: all engines stopped')
-            this.arm.close().then(() => {
-                console.log('GENERAL: arm closed')
-                console.log('GENERAL: autokill')
-                // exit the process (autokill)
-                process.exit(1)
-            })
+        this.reset().then(() => {
+            console.log('GENERAL: autokill')
+            // exit the process (autokill)
+            process.exit(1)
         })
     }
 
     reset() {
         return new Promise((resolve) => {
-            this.arduino.sendCommand('STOPALL').then(() => {
+            this.engine.stopAll().then(() => {
                 this.color.clear().then(() => {
                     this.beacon.disable().then(() => {
                         this.arm.close().then(() => {
